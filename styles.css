@@ -169,10 +169,10 @@ body {
   gap: clamp(1.5rem, 3vw, 2.5rem);
   overflow: hidden;
   isolation: isolate;
-  /* Silver chrome floor — soft top bloom + smooth vertical tonal
-     range. Cool-tinted silver throughout. The face overlay below
-     multiplies onto this so the face reads as etched into the chrome,
-     not slapped on top. */
+  /* Framer-style chrome floor — soft top bloom + smooth vertical
+     tonal range. No horizontal banding (the earlier "horizon stripe"
+     read as a misaligned divider once the rest of the hero was
+     stripped down). Cool-tinted silver throughout. */
   background:
     radial-gradient(
       ellipse 130vw 95vh at 50% -8%,
@@ -188,31 +188,6 @@ body {
       #8c94a0 92%,
       #6a727c 100%
     );
-}
-
-/* Face portrait overlaid on the silver floor with mix-blend-mode:
-   multiply so the photo's tonal variations imprint into the chrome
-   instead of replacing it. Greyscale + slight contrast to match the
-   chrome aesthetic. The blend lives on the wrapper (not the img) so
-   it composites against the silver bg of .hero, not the wrapper's
-   own transparent stacking context. */
-.hero__bg {
-  position: absolute;
-  inset: 0;
-  z-index: -2;
-  overflow: hidden;
-  pointer-events: none;
-  mix-blend-mode: multiply;
-}
-
-.hero__bg-img {
-  display: block;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  object-position: 50% 30%;
-  filter: grayscale(1) contrast(1.05);
-  opacity: 0.65;
 }
 
 /* Brushed steel + film grain only (crosshair grid removed from hero
@@ -237,10 +212,10 @@ body {
   inset: 0;
   pointer-events: none;
   background: radial-gradient(
-    circle 30vw at var(--fx, 50%) var(--fy, 50%),
-    rgba(255, 255, 255, 0.45) 0%,
-    rgba(255, 255, 255, 0.16) 26%,
-    transparent 56%
+    circle 28vw at var(--fx, 50%) var(--fy, 50%),
+    rgba(255, 255, 255, 0.32) 0%,
+    rgba(255, 255, 255, 0.10) 25%,
+    transparent 55%
   );
   mix-blend-mode: overlay;
   opacity: var(--cursor-on, 0);
@@ -248,7 +223,7 @@ body {
   z-index: 0;
 }
 
-.hero > *:not(.hero__floor-light):not(.hero__bg) {
+.hero > *:not(.hero__floor-light) {
   position: relative;
   z-index: 1;
 }
