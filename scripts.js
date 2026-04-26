@@ -454,6 +454,88 @@ function renderShows(shows) {
   }
 }
 
+/* Sets — DJ mixes/sets archive grouped by genre. Item order in
+   sets.json is preserved within each genre, and genre groups are
+   ordered by first-appearance so the most recently added set's genre
+   surfaces at the top automatically. Each row links out; embeds live
+   on the latest-track card up top to keep this section scannable. */
+function renderSets(sets) {
+  const root = $("[data-sets]");
+  if (!root) return;
+  root.innerHTML = "";
+
+  const items = Array.isArray(sets.items) ? sets.items : [];
+  if (!items.length) {
+    const empty = document.createElement("p");
+    empty.className = "sets__empty";
+    empty.textContent = "No sets posted yet.";
+    root.append(empty);
+    return;
+  }
+
+  /* Group by genre, preserving first-appearance order */
+  const groups = new Map();
+  for (const item of items) {
+    const genre = item.genre || "Other";
+    if (!groups.has(genre)) groups.set(genre, []);
+    groups.get(genre).push(item);
+  }
+
+  for (const [genre, list] of groups) {
+    const group = document.createElement("div");
+    group.className = "sets__group";
+
+    const heading = document.createElement("h3");
+    heading.className = "sets__group-heading";
+    heading.textContent = genre;
+    group.append(heading);
+
+    const ol = document.createElement("ol");
+    ol.className = "sets__list";
+
+    for (const item of list) {
+      ol.append(buildSetRow(item));
+    }
+
+    group.append(ol);
+    root.append(group);
+  }
+}
+
+function buildSetRow(item) {
+  const li = document.createElement("li");
+  li.className = "set";
+
+  const a = document.createElement("a");
+  a.className = "set__link";
+  a.href = item.external_url || "#";
+  if (item.external_url) {
+    a.target = "_blank";
+    a.rel = "noopener";
+  }
+
+  const title = document.createElement("span");
+  title.className = "set__title";
+  title.textContent = item.title || "";
+
+  const platform = document.createElement("span");
+  platform.className = "set__platform";
+  platform.textContent = item.platform || "";
+
+  const date = document.createElement("span");
+  date.className = "set__date";
+  date.textContent = item.date || "";
+
+  const arrow = document.createElement("span");
+  arrow.className = "set__arrow";
+  arrow.setAttribute("aria-hidden", "true");
+  arrow.textContent = "↗";
+
+  a.append(title, platform, date, arrow);
+  li.append(a);
+  return li;
+}
+
 /* Contact form — POSTs to Web3Forms. Refuses to send if the access key is
    still the placeholder; user updates content.json with their real key. */
 function initContactForm() {
@@ -592,16 +674,18 @@ function initSectionReveals() {
 
 (async function init() {
   try {
-    const [content, stats, tracks, shows] = await Promise.all([
+    const [content, stats, tracks, sets, shows] = await Promise.all([
       loadJSON("data/content.json"),
       loadJSON("data/stats.json"),
       loadJSON("data/tracks.json"),
+      loadJSON("data/sets.json"),
       loadJSON("data/shows.json"),
     ]);
     bindAll("content", content);
     renderStats(stats.items);
     renderGenres(content.genres);
     renderMusic(tracks);
+    renderSets(sets);
     renderShows(shows);
   } catch (err) {
     console.error("[suyan] init failed:", err);
