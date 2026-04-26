@@ -330,6 +330,20 @@ body {
 .wordmark.is-resolved .wordmark__still { opacity: 1; }
 .wordmark.is-resolved .wordmark__video { opacity: 0; }
 
+/* iOS Safari < 17 falls back to the H.264 mp4, which can't carry alpha.
+   The mp4 ships with a black matte; mix-blend-mode: screen drops it
+   (black is the identity element of screen blend), and a small contrast
+   bump crushes any compression-bleed near-blacks back to true black so
+   the keying stays clean. JS adds .is-mp4 only when the mp4 source is
+   the active one, so the webm path (true alpha) stays untouched. */
+.wordmark__video.is-mp4 {
+  mix-blend-mode: screen;
+  filter:
+    contrast(1.08)
+    drop-shadow(0 12px 30px rgba(0, 0, 0, 0.30))
+    drop-shadow(0 36px 80px rgba(0, 0, 0, 0.18));
+}
+
 /* -- Bottom row — minimal scroll cue only -------------------------- */
 
 .hero__bottom {

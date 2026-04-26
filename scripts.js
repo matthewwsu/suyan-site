@@ -134,7 +134,14 @@ function renderStats(items) {
    is open. Reduced-motion users (or browsers that block autoplay) fall
    through to the static PNG via the .is-resolved class. The native
    <video loop> attribute handles the looping; this function only deals
-   with the fallback paths. */
+   with the fallback paths.
+
+   Two source formats are shipped: webm (VP9 + alpha) for modern
+   browsers, mp4 (H.264, no alpha) for iOS Safari < 17 and other
+   browsers without VP9-alpha support. When the mp4 is the chosen
+   source, we tag the video with .is-mp4 so the CSS can apply
+   mix-blend-mode: screen to drop the black background that H.264 can't
+   carry as alpha. The webm path doesn't need the blend (true alpha). */
 function initIntroVideo() {
   const wordmark = $(".wordmark");
   const video    = $(".wordmark__video");
@@ -144,6 +151,14 @@ function initIntroVideo() {
     wordmark.classList.add("is-resolved");
     return;
   }
+
+  const tagMp4 = () => {
+    if (video.currentSrc && video.currentSrc.endsWith(".mp4")) {
+      video.classList.add("is-mp4");
+    }
+  };
+  if (video.readyState >= 1) tagMp4();
+  else video.addEventListener("loadedmetadata", tagMp4, { once: true });
 
   /* Belt-and-suspenders: muted+playsinline+autoplay should start
      playback automatically, but call .play() too in case the browser
