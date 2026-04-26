@@ -169,22 +169,40 @@ body {
   gap: clamp(1.5rem, 3vw, 2.5rem);
   overflow: hidden;
   isolation: isolate;
-  /* Fallback solid in case the face image fails to load. The
-     .hero__bg layer below covers this in normal use. */
-  background: #1a1e26;
+  /* Silver chrome floor — soft top bloom + smooth vertical tonal
+     range. Cool-tinted silver throughout. The face overlay below
+     multiplies onto this so the face reads as etched into the chrome,
+     not slapped on top. */
+  background:
+    radial-gradient(
+      ellipse 130vw 95vh at 50% -8%,
+      rgba(255, 255, 255, 0.50) 0%,
+      rgba(255, 255, 255, 0.10) 30%,
+      transparent 60%
+    ),
+    linear-gradient(
+      180deg,
+      #dde2ea 0%,
+      #c4cad4 32%,
+      #aab2bc 62%,
+      #8c94a0 92%,
+      #6a727c 100%
+    );
 }
 
-/* Face portrait as the hero background — full-bleed, greyscale to
-   match the chrome aesthetic, with a radial vignette so the chrome
-   wordmark stays legible against the centred face. The brushed-steel
-   + film-grain ::before overlay sits above this and blends onto it
-   automatically (mix-blend-mode: overlay), as does the cursor floor
-   light. */
+/* Face portrait overlaid on the silver floor with mix-blend-mode:
+   multiply so the photo's tonal variations imprint into the chrome
+   instead of replacing it. Greyscale + slight contrast to match the
+   chrome aesthetic. The blend lives on the wrapper (not the img) so
+   it composites against the silver bg of .hero, not the wrapper's
+   own transparent stacking context. */
 .hero__bg {
   position: absolute;
   inset: 0;
   z-index: -2;
   overflow: hidden;
+  pointer-events: none;
+  mix-blend-mode: multiply;
 }
 
 .hero__bg-img {
@@ -192,24 +210,9 @@ body {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  object-position: center;
-  filter: grayscale(1) contrast(1.05) brightness(0.55);
-}
-
-/* Vignette: keep the centre relatively bright so the face reads,
-   crush the edges so they recede and frame the wordmark. */
-.hero__bg::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background:
-    radial-gradient(
-      ellipse 90vw 75vh at 50% 50%,
-      transparent 0%,
-      rgba(0, 0, 0, 0.35) 60%,
-      rgba(0, 0, 0, 0.65) 100%
-    );
-  pointer-events: none;
+  object-position: 50% 30%;
+  filter: grayscale(1) contrast(1.05);
+  opacity: 0.65;
 }
 
 /* Brushed steel + film grain only (crosshair grid removed from hero
@@ -234,10 +237,10 @@ body {
   inset: 0;
   pointer-events: none;
   background: radial-gradient(
-    circle 28vw at var(--fx, 50%) var(--fy, 50%),
-    rgba(255, 255, 255, 0.32) 0%,
-    rgba(255, 255, 255, 0.10) 25%,
-    transparent 55%
+    circle 30vw at var(--fx, 50%) var(--fy, 50%),
+    rgba(255, 255, 255, 0.45) 0%,
+    rgba(255, 255, 255, 0.16) 26%,
+    transparent 56%
   );
   mix-blend-mode: overlay;
   opacity: var(--cursor-on, 0);
@@ -245,7 +248,7 @@ body {
   z-index: 0;
 }
 
-.hero > *:not(.hero__floor-light) {
+.hero > *:not(.hero__floor-light):not(.hero__bg) {
   position: relative;
   z-index: 1;
 }
@@ -261,7 +264,7 @@ body {
   font-size: clamp(0.7rem, 0.85vw, 0.78rem);
   letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: rgba(255, 255, 255, 0.75);
+  color: var(--grey-2);
 }
 
 .hero__brand,
@@ -274,11 +277,11 @@ body {
 
 .hero__brand-mark {
   font-size: 0.65rem;
-  color: #fff;
+  color: var(--fg);
 }
 
 .hero__divider {
-  color: rgba(255, 255, 255, 0.35);
+  color: var(--grey-4);
 }
 
 .hero__status-dot {
@@ -286,9 +289,9 @@ body {
   display: inline-block;
   width: 8px;
   height: 8px;
-  background: #f4f4f5;
+  background: var(--fg);
   border-radius: 50%;
-  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.15);
+  box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.05);
 }
 
 .hero__status-dot::after {
@@ -296,7 +299,7 @@ body {
   position: absolute;
   inset: -3px;
   border-radius: 50%;
-  border: 1px solid rgba(255, 255, 255, 0.5);
+  border: 1px solid rgba(0, 0, 0, 0.45);
   animation: pulse 2.2s ease-out infinite;
 }
 
@@ -377,7 +380,7 @@ body {
   background: linear-gradient(
     to bottom,
     transparent 0%,
-    rgba(255, 255, 255, 0.6) 50%,
+    rgba(0, 0, 0, 0.55) 50%,
     transparent 100%
   );
 }
@@ -385,7 +388,7 @@ body {
 .hero__cue-dot {
   width: 4px;
   height: 4px;
-  background: rgba(255, 255, 255, 0.75);
+  background: rgba(0, 0, 0, 0.7);
   border-radius: 50%;
   animation: cue-bounce 2.4s ease-in-out infinite;
 }
