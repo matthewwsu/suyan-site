@@ -1,0 +1,28 @@
+{
+  "hosting": {
+    "public": ".",
+    "ignore": [
+      "firebase.json",
+      "**/.*",
+      "**/node_modules/**",
+      "CLAUDE.md",
+      "notes.md"
+    ],
+    "headers": [
+      {
+        "source": "**/*.@(css|js)",
+        "headers": [{ "key": "Cache-Control", "value": "public, max-age=3600, must-revalidate" }]
+      },
+      {
+        "source": "**/*.@(jpg|jpeg|png|webp|svg|woff2|ico)",
+        "headers": [{ "key": "Cache-Control", "value": "public, max-age=604800, immutable" }]
+      },
+      {
+        "source": "data/**/*.json",
+        "headers": [{ "key": "Cache-Control", "value": "public, max-age=60, must-revalidate" }]
+      }
+    ],
+    "cleanUrls": true,
+    "trailingSlash": false
+  }
+}
