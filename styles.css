@@ -435,6 +435,25 @@ body {
   padding-left: clamp(1rem, 2vw, 1.5rem);
 }
 
+/* Platform icon stamped at the top of each stat column. The icon is a
+   chrome-gradient silhouette (same gradient as the labels), masked by
+   the platform logo's alpha channel — colored brand marks become
+   monochrome chrome stamps that read native to the metal aesthetic. */
+.stats__icon {
+  display: block;
+  width: clamp(1.05rem, 1.6vw, 1.35rem);
+  height: clamp(1.05rem, 1.6vw, 1.35rem);
+  background: linear-gradient(
+    180deg,
+    #f4f6fa 0%,
+    #d4d8e0 50%,
+    #f4f6fa 100%
+  );
+  -webkit-mask: var(--icon) left center / contain no-repeat;
+          mask: var(--icon) left center / contain no-repeat;
+  margin-bottom: -0.05rem;
+}
+
 .stats__num {
   font-family: var(--font-mono);
   font-weight: 500;
@@ -546,8 +565,44 @@ body {
   background: rgba(255, 255, 255, 0.07);
 }
 
+/* Social icon row in the pill. Uses the same chrome-gradient mask
+   technique as the stats icons, sized down for the nav. Stays visible
+   on mobile (where the section links collapse) so social access from
+   the top of the page survives the breakpoint. */
+.topnav__social {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  list-style: none;
+  padding-left: 0.6rem;
+  border-left: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.topnav__social-link {
+  display: block;
+  width: 17px;
+  height: 17px;
+  background: linear-gradient(
+    180deg,
+    #f4f6fa 0%,
+    #d4d8e0 50%,
+    #f4f6fa 100%
+  );
+  -webkit-mask: var(--icon) center / contain no-repeat;
+          mask: var(--icon) center / contain no-repeat;
+  opacity: 0.7;
+  transition: opacity 200ms ease, transform 240ms ease;
+  cursor: pointer;
+}
+
+.topnav__social-link:hover {
+  opacity: 1;
+  transform: translateY(-1px);
+}
+
 @media (max-width: 720px) {
-  .topnav__links { display: none; }
+  .topnav__links  { display: none; }
+  .topnav__social { padding-left: 0.4rem; border-left: none; }
 }
 
 /* =========================================================================

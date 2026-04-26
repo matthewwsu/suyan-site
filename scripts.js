@@ -88,6 +88,14 @@ function renderStats(items) {
     const li = document.createElement("li");
     li.className = "stats__item";
 
+    if (s.icon) {
+      const icon = document.createElement("span");
+      icon.className = "stats__icon";
+      icon.setAttribute("aria-hidden", "true");
+      icon.style.setProperty("--icon", `url("${s.icon}")`);
+      li.append(icon);
+    }
+
     const num = document.createElement("span");
     num.className = "stats__num";
     num.dataset.target = String(s.value);

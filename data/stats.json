@@ -1,8 +1,8 @@
 {
   "items": [
-    { "label": "spotify streams",    "value": 2400000, "suffix": "" },
-    { "label": "soundcloud streams", "value": 220000,  "suffix": "" },
-    { "label": "monthly listeners",  "value": 120000,  "suffix": "+" },
-    { "label": "tiktok views",       "value": 3200000, "suffix": "" }
+    { "label": "spotify streams",    "value": 2400000, "suffix": "",  "icon": "assets/press/spotify.png" },
+    { "label": "soundcloud streams", "value": 220000,  "suffix": "",  "icon": "assets/press/soundcloud.png" },
+    { "label": "monthly listeners",  "value": 120000,  "suffix": "+", "icon": "assets/press/spotify.png" },
+    { "label": "tiktok views",       "value": 3200000, "suffix": "",  "icon": "assets/press/tiktok.webp" }
   ]
 }
