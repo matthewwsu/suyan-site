@@ -130,12 +130,11 @@ function renderStats(items) {
 
 /* ------------------------------------------------------------------ */
 
-/* Hero intro: play the chrome wordmark video N times, then crossfade to
-   the static PNG. Both files are black-matte rendered chrome; CSS uses
-   mix-blend-mode: screen to drop the black so they composite cleanly
-   over the silver hero floor. Reduced-motion users skip the video and
-   see the still immediately (handled in CSS). Autoplay-blocked browsers
-   also fall through to the still. */
+/* Hero intro: chrome wordmark video loops indefinitely while the page
+   is open. Reduced-motion users (or browsers that block autoplay) fall
+   through to the static PNG via the .is-resolved class. The native
+   <video loop> attribute handles the looping; this function only deals
+   with the fallback paths. */
 function initIntroVideo() {
   const wordmark = $(".wordmark");
   const video    = $(".wordmark__video");
@@ -146,23 +145,10 @@ function initIntroVideo() {
     return;
   }
 
-  const LOOPS = 2;
-  let played = 0;
-
-  video.addEventListener("ended", () => {
-    played += 1;
-    if (played < LOOPS) {
-      video.currentTime = 0;
-      video.play().catch(() => wordmark.classList.add("is-resolved"));
-    } else {
-      wordmark.classList.add("is-resolved");
-    }
-  });
-
-  /* Belt-and-suspenders: the muted+playsinline+autoplay attrs should
-     start playback automatically, but call .play() too in case the
-     browser delayed it. If autoplay is blocked entirely (rare for muted
-     video), fall through to the still. */
+  /* Belt-and-suspenders: muted+playsinline+autoplay should start
+     playback automatically, but call .play() too in case the browser
+     delayed it. If autoplay is blocked entirely, fall through to the
+     still. */
   const start = video.play();
   if (start && typeof start.catch === "function") {
     start.catch(() => wordmark.classList.add("is-resolved"));
