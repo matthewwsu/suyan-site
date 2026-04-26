@@ -295,80 +295,40 @@ body {
 .wordmark-wrap {
   position: relative;
   display: inline-block;
-  /* Keep room beneath the wordmark for the mirror reflection */
-  padding-bottom: clamp(2.5rem, 6vw, 5rem);
 }
 
+/* Stack video + still in a single grid cell so they overlap pixel-
+   stably with no absolute-positioning quirks. Both share the same
+   aspect ratio, so the crossfade is a pure opacity swap with no
+   layout shift. The assets carry true alpha channels (chroma-keyed
+   during encoding), so no blend mode required. */
 .wordmark {
-  position: relative;
-  display: block;
-  width: fit-content;
+  display: inline-grid;
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: auto;
   margin: 0 auto;
-  text-align: center;
   user-select: none;
 }
 
-/* Video plays the chrome intro; still PNG sits stacked over it at
-   opacity 0 and fades in once the loop count is reached, while the
-   video fades out. Both share the same aspect ratio, so the swap is
-   pixel-stable. mix-blend-mode: screen drops the pure-black background
-   in both files (black is the identity element of screen blend). */
 .wordmark__video,
 .wordmark__still {
+  grid-column: 1;
+  grid-row: 1;
   display: block;
-  width: clamp(20rem, 80vw, 72rem);
+  width: clamp(14rem, 38vw, 32rem);
   height: auto;
   aspect-ratio: 4816 / 2688;
-  mix-blend-mode: screen;
   pointer-events: none;
   filter:
     drop-shadow(0 12px 30px rgba(0, 0, 0, 0.30))
     drop-shadow(0 36px 80px rgba(0, 0, 0, 0.18));
-}
-
-.wordmark__still {
-  position: absolute;
-  inset: 0 auto auto 0;
-  opacity: 0;
   transition: opacity 700ms ease;
 }
 
-.wordmark__video {
-  transition: opacity 700ms ease;
-}
+.wordmark__still { opacity: 0; }
 
 .wordmark.is-resolved .wordmark__still { opacity: 1; }
 .wordmark.is-resolved .wordmark__video { opacity: 0; }
-
-/* Mirror reflection — flipped PNG fading into the silver floor. Same
-   width as the wordmark, centered under it; mask reversed so the
-   visible side closest to the wordmark is the most opaque. */
-.wordmark__reflect {
-  position: absolute;
-  top: 100%;
-  left: 50%;
-  display: block;
-  width: clamp(20rem, 80vw, 72rem);
-  height: auto;
-  aspect-ratio: 4816 / 2688;
-  transform: translateX(-50%) scaleY(-1);
-  mix-blend-mode: screen;
-  pointer-events: none;
-  filter: blur(0.5px);
-  opacity: 0.45;
-  -webkit-mask-image: linear-gradient(
-    to top,
-    rgba(0, 0, 0, 0.45) 0%,
-    rgba(0, 0, 0, 0.12) 32%,
-    transparent 70%
-  );
-          mask-image: linear-gradient(
-    to top,
-    rgba(0, 0, 0, 0.45) 0%,
-    rgba(0, 0, 0, 0.12) 32%,
-    transparent 70%
-  );
-}
 
 /* -- Bottom row — minimal scroll cue only -------------------------- */
 
@@ -520,7 +480,7 @@ body {
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
   .wordmark__video         { display: none; }
-  .wordmark__still         { opacity: 1; transition: none; position: static; }
+  .wordmark__still         { opacity: 1; transition: none; }
   .hero__status-dot::after { animation: none; }
   .shockwave               { display: none; }
   .section                 { transform: none !important; opacity: 1 !important; }
