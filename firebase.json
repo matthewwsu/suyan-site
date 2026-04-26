@@ -3,7 +3,13 @@
     "public": ".",
     "ignore": [
       "firebase.json",
-      "**/.*",
+      ".firebaserc",
+      ".firebase/**",
+      ".git/**",
+      ".github/**",
+      ".claude/**",
+      ".gitignore",
+      "**/.DS_Store",
       "**/node_modules/**",
       "CLAUDE.md",
       "notes.md"
