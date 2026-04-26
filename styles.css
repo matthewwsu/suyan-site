@@ -1,0 +1,1581 @@
+/* -------------------------------------------------------------------------
+   SUYAN — chrome / industrial / editorial — v2
+   Polished metal floor. Dark-chrome wordmark. Custom cursor. Asymmetric.
+-------------------------------------------------------------------------- */
+
+:root {
+  /* Silver floor palette — cool-tinted to read as polished metal,
+     not concrete. Highlight pushed brighter, shadow pushed deeper. */
+  --bg-floor:   #c0c8d0;
+  --bg-floor-2: #dde4ea;
+  --bg-floor-3: #8a929c;
+  --bg-deep:    #5a626c;
+
+  --fg:    #08090d;
+  --fg-2:  #1a1c22;
+
+  --grey-1: #262a32;
+  --grey-2: #464a54;
+  --grey-3: #686c76;
+  --grey-4: #8a8e98;
+  --grey-5: #c8ccd4;
+
+  /* Dark chrome — wordmark + stats numerals.
+     Cool blue cast + specular white hotspots near each rim band give a
+     true polished-metal read instead of flat dark grey. */
+  --chrome-dark: linear-gradient(
+    180deg,
+    #6c7282 0%,
+    #ffffff 6%,
+    #383c4a 16%,
+    #0a0c18 36%,
+    #1a1e2c 50%,
+    #0a0c18 64%,
+    #383c4a 84%,
+    #ffffff 94%,
+    #6c7282 100%
+  );
+
+  /* Brushed-metal horizontal grain */
+  --brush:
+    repeating-linear-gradient(
+      90deg,
+      rgba(255, 255, 255, 0.05) 0px,
+      rgba(255, 255, 255, 0.05) 1px,
+      rgba(0, 0, 0, 0.04) 1px,
+      rgba(0, 0, 0, 0.04) 2px
+    );
+
+  /* SVG film grain — softens banding, adds cinematic texture */
+  --grain: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.55'/%3E%3C/svg%3E");
+
+  /* Schematic crosshair grid — small + marks at regular intervals,
+     reads as technical drawing / control-panel underlay. Two variants:
+     dark-on-light for the silver hero, light-on-dark for the surface. */
+  --pattern-cross-light: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='44' height='44'%3E%3Cg fill='none' stroke='%23000000' stroke-width='0.6'%3E%3Cline x1='22' y1='19' x2='22' y2='25'/%3E%3Cline x1='19' y1='22' x2='25' y2='22'/%3E%3C/g%3E%3C/svg%3E");
+  --pattern-cross-dark: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='44' height='44'%3E%3Cg fill='none' stroke='%23ffffff' stroke-width='0.6'%3E%3Cline x1='22' y1='19' x2='22' y2='25'/%3E%3Cline x1='19' y1='22' x2='25' y2='22'/%3E%3C/g%3E%3C/svg%3E");
+
+  /* Chrome rule — horizontal gradient line, dark at edges, bright in
+     the middle. Used for section dividers in the dark surface. */
+  --chrome-rule: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.04) 8%,
+    rgba(255, 255, 255, 0.42) 50%,
+    rgba(255, 255, 255, 0.04) 92%,
+    transparent 100%
+  );
+
+  /* Anton — extremely narrow, heavy display face. Editorial-future
+     proportions; SUYAN at 30vw fits inside the viewport without
+     overflowing (Anton runs ~2.7em wide for 5 chars vs Unbounded's ~5em).
+     Plus Jakarta Sans — clean geometric grotesque for body. */
+  --font-display: "Anton", "Bebas Neue", system-ui, sans-serif;
+  --font-body:    "Plus Jakarta Sans", system-ui, -apple-system, sans-serif;
+  --font-mono:    "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+
+  --gutter: clamp(1.25rem, 4vw, 3rem);
+  --max:    1400px;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  scroll-behavior: smooth;
+  background: var(--bg-floor);
+}
+
+body {
+  background: var(--bg-floor);
+  color: var(--fg);
+  font-family: var(--font-body);
+  font-weight: 400;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  overflow-x: hidden;
+}
+
+::selection {
+  background: var(--fg);
+  color: var(--bg-floor-2);
+}
+
+/* -----------------------------------------------------------------------
+   Custom cursor — chrome reticle. Hover-capable devices only.
+   mix-blend-mode: difference keeps it visible against silver and chrome.
+------------------------------------------------------------------------ */
+
+.cursor {
+  position: fixed;
+  top: 0;
+  left: 0;
+  pointer-events: none;
+  transform: translate3d(var(--cx, -100px), var(--cy, -100px), 0);
+  z-index: 1000;
+  opacity: 0;
+  transition: opacity 200ms ease;
+  mix-blend-mode: difference;
+}
+
+.cursor.is-active { opacity: 1; }
+
+.cursor__ring {
+  width: 32px;
+  height: 32px;
+  border: 1px solid #fff;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  transition: transform 220ms ease, border-color 220ms ease;
+}
+
+.cursor__dot {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 4px;
+  height: 4px;
+  background: #fff;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.cursor.is-hover .cursor__ring {
+  transform: translate(-50%, -50%) scale(1.6);
+  border-color: rgba(255, 255, 255, 0.5);
+}
+
+@media (hover: hover) {
+  .hero,
+  .hero * { cursor: none; }
+}
+
+/* -----------------------------------------------------------------------
+   Hero — polished metal floor
+------------------------------------------------------------------------ */
+
+.hero {
+  position: relative;
+  min-height: 65svh;
+  padding: clamp(1.25rem, 3vw, 2rem) var(--gutter);
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  gap: clamp(1.5rem, 3vw, 2.5rem);
+  overflow: hidden;
+  isolation: isolate;
+  /* Framer-style chrome floor — soft top bloom + smooth vertical
+     tonal range. No horizontal banding (the earlier "horizon stripe"
+     read as a misaligned divider once the rest of the hero was
+     stripped down). Cool-tinted silver throughout. */
+  background:
+    radial-gradient(
+      ellipse 130vw 95vh at 50% -8%,
+      rgba(255, 255, 255, 0.50) 0%,
+      rgba(255, 255, 255, 0.10) 30%,
+      transparent 60%
+    ),
+    linear-gradient(
+      180deg,
+      #dde2ea 0%,
+      #c4cad4 32%,
+      #aab2bc 62%,
+      #8c94a0 92%,
+      #6a727c 100%
+    );
+}
+
+/* Brushed steel + film grain only (crosshair grid removed from hero
+   for the cleaner Framer-style read; the surface still uses it). */
+.hero::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    var(--brush),
+    var(--grain);
+  background-size: auto, 220px 220px;
+  opacity: 0.35;
+  pointer-events: none;
+  mix-blend-mode: overlay;
+  z-index: -1;
+}
+
+/* Cursor-tracked light spot — the floor reflects the pointer */
+.hero__floor-light {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(
+    circle 28vw at var(--fx, 50%) var(--fy, 50%),
+    rgba(255, 255, 255, 0.32) 0%,
+    rgba(255, 255, 255, 0.10) 25%,
+    transparent 55%
+  );
+  mix-blend-mode: overlay;
+  opacity: var(--cursor-on, 0);
+  transition: opacity 280ms ease;
+  z-index: 0;
+}
+
+.hero > *:not(.hero__floor-light) {
+  position: relative;
+  z-index: 1;
+}
+
+/* -- Top row -------------------------------------------------------- */
+
+.hero__top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+  font-family: var(--font-mono);
+  font-size: clamp(0.7rem, 0.85vw, 0.78rem);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--grey-2);
+}
+
+.hero__brand,
+.hero__status {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.65rem;
+  flex-wrap: wrap;
+}
+
+.hero__brand-mark {
+  font-size: 0.65rem;
+  color: var(--fg);
+}
+
+.hero__divider {
+  color: var(--grey-4);
+}
+
+.hero__status-dot {
+  position: relative;
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  background: var(--fg);
+  border-radius: 50%;
+  box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.05);
+}
+
+.hero__status-dot::after {
+  content: "";
+  position: absolute;
+  inset: -3px;
+  border-radius: 50%;
+  border: 1px solid rgba(0, 0, 0, 0.45);
+  animation: pulse 2.2s ease-out infinite;
+}
+
+@keyframes pulse {
+  0%   { transform: scale(0.8); opacity: 0.7; }
+  100% { transform: scale(2.6); opacity: 0; }
+}
+
+/* -- Stage / wordmark ---------------------------------------------- */
+
+.hero__stage {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+.wordmark-wrap {
+  position: relative;
+  display: inline-block;
+  /* Keep room beneath the wordmark for the mirror reflection */
+  padding-bottom: clamp(2.5rem, 6vw, 5rem);
+}
+
+.wordmark {
+  display: block;
+  font-family: var(--font-display);
+  font-weight: 400;        /* Anton ships as a single Regular weight that's already heavy */
+  font-size: clamp(4.5rem, 24vw, 22rem);
+  line-height: 0.92;       /* Anton has tall caps; tighter line-height clips ascenders */
+  letter-spacing: -0.02em;
+  text-align: center;
+  user-select: none;
+}
+
+.wordmark__plate {
+  --mx: 50%;
+  --my: 50%;
+
+  position: relative;
+  display: inline-block;
+  background-image: var(--chrome-dark);
+  background-size: 100% 240%;
+  background-position: 0% 0%;
+  background-repeat: no-repeat;
+  -webkit-background-clip: text;
+          background-clip: text;
+  color: transparent;
+  -webkit-text-fill-color: transparent;
+  filter:
+    drop-shadow(0 1px 0 rgba(255, 255, 255, 0.55))
+    drop-shadow(0 12px 30px rgba(0, 0, 0, 0.30))
+    drop-shadow(0 36px 80px rgba(0, 0, 0, 0.18));
+  animation: chrome-drift 14s ease-in-out infinite alternate;
+}
+
+/* Cursor wave — a single soft chrome highlight that lazy-follows the
+   cursor. JS lerps --mx / --my toward the cursor's position each frame
+   so the spotlight glides instead of snapping. No spawning, no pulsing
+   — one continuous gentle wave. */
+.wordmark__plate::after {
+  content: attr(data-text);
+  position: absolute;
+  inset: 0;
+  background-image: linear-gradient(
+    180deg,
+    #f6f6fa 0%,
+    #ffffff 50%,
+    #d8d8dc 100%
+  );
+  -webkit-background-clip: text;
+          background-clip: text;
+  color: transparent;
+  -webkit-text-fill-color: transparent;
+  pointer-events: none;
+  opacity: var(--wave, 0);
+  transition: opacity 600ms ease;
+
+  -webkit-mask-image: radial-gradient(
+    circle 18vw at var(--mx) var(--my),
+    rgba(0, 0, 0, 0.55) 0%,
+    rgba(0, 0, 0, 0.30) 28%,
+    rgba(0, 0, 0, 0.12) 50%,
+    transparent 75%
+  );
+          mask-image: radial-gradient(
+    circle 18vw at var(--mx) var(--my),
+    rgba(0, 0, 0, 0.55) 0%,
+    rgba(0, 0, 0, 0.30) 28%,
+    rgba(0, 0, 0, 0.12) 50%,
+    transparent 75%
+  );
+}
+
+/* Mirror reflection beneath the wordmark — fades into the floor.
+   scaleY(-1) flips vertically; mask gradient is reversed accordingly so
+   the visible side closest to the wordmark is the most opaque. */
+.wordmark__reflect {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  display: block;
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: clamp(4.5rem, 24vw, 22rem);
+  line-height: 0.92;
+  letter-spacing: -0.02em;
+  background-image: var(--chrome-dark);
+  -webkit-background-clip: text;
+          background-clip: text;
+  color: transparent;
+  -webkit-text-fill-color: transparent;
+  transform: scaleY(-1);
+  -webkit-mask-image: linear-gradient(
+    to top,
+    rgba(0, 0, 0, 0.40) 0%,
+    rgba(0, 0, 0, 0.10) 30%,
+    transparent 70%
+  );
+          mask-image: linear-gradient(
+    to top,
+    rgba(0, 0, 0, 0.40) 0%,
+    rgba(0, 0, 0, 0.10) 30%,
+    transparent 70%
+  );
+  pointer-events: none;
+  filter: blur(0.4px);
+  opacity: 0.5;
+}
+
+@keyframes chrome-drift {
+  0%   { background-position: 0% 0%; }
+  100% { background-position: 0% 100%; }
+}
+
+/* -- Bottom row — minimal scroll cue only -------------------------- */
+
+.hero__bottom {
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+  padding-bottom: 0.5rem;
+}
+
+.hero__cue {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.55rem;
+  text-decoration: none;
+  padding: 0.5rem 1rem;
+  cursor: pointer;
+}
+
+.hero__cue-line {
+  width: 1px;
+  height: 36px;
+  background: linear-gradient(
+    to bottom,
+    transparent 0%,
+    rgba(0, 0, 0, 0.55) 50%,
+    transparent 100%
+  );
+}
+
+.hero__cue-dot {
+  width: 4px;
+  height: 4px;
+  background: rgba(0, 0, 0, 0.7);
+  border-radius: 50%;
+  animation: cue-bounce 2.4s ease-in-out infinite;
+}
+
+@keyframes cue-bounce {
+  0%, 100% { transform: translateY(0);   opacity: 0.45; }
+  50%      { transform: translateY(5px); opacity: 1;    }
+}
+
+.hero__cue:hover .hero__cue-dot { animation-duration: 1.4s; }
+
+/* -- Click shockwave ----------------------------------------------- */
+
+.shockwave {
+  position: fixed;
+  width: 0;
+  height: 0;
+  border: 2px solid rgba(0, 0, 0, 0.45);
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  animation: shockwave 1100ms cubic-bezier(0.2, 0.7, 0.3, 1) forwards;
+  z-index: 50;
+  mix-blend-mode: multiply;
+}
+
+@keyframes shockwave {
+  0%   { width: 0;       height: 0;       opacity: 0.55; border-width: 2px; }
+  100% { width: 100vmax; height: 100vmax; opacity: 0;    border-width: 0.5px; }
+}
+
+/* -----------------------------------------------------------------------
+   Stats — silver theme, dark-chrome numerals
+------------------------------------------------------------------------ */
+
+.stats {
+  border-top: 1px solid var(--grey-4);
+  padding: clamp(1rem, 2.5vw, 1.75rem) var(--gutter);
+  background:
+    linear-gradient(
+      180deg,
+      #6a727c 0%,
+      #58606a 50%,
+      #3e4650 100%
+    );
+}
+
+.stats__grid {
+  list-style: none;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: clamp(1rem, 2.5vw, 1.75rem) clamp(1rem, 3vw, 2.5rem);
+  max-width: var(--max);
+  margin: 0 auto;
+}
+
+/* 4-column layout kicks in earlier (was 768px) so stats stays a single
+   row sooner — keeps the bar short enough to land in the first frame
+   alongside the hero on common laptop viewports. */
+@media (min-width: 600px) {
+  .stats__grid { grid-template-columns: repeat(4, 1fr); }
+}
+
+.stats__item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+  border-left: 1px solid var(--grey-4);
+  padding-left: clamp(1rem, 2vw, 1.5rem);
+}
+
+.stats__num {
+  font-family: var(--font-mono);
+  font-weight: 500;
+  font-size: clamp(1.85rem, 4.5vw, 2.85rem);
+  line-height: 1;
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+  background-image: var(--chrome-dark);
+  background-size: 100% 200%;
+  background-position: 0% 30%;
+  -webkit-background-clip: text;
+          background-clip: text;
+  color: transparent;
+  -webkit-text-fill-color: transparent;
+}
+
+/* Stats labels — bright silver chrome on the dark stats floor.
+   Earlier "chrome black" treatment lost its dark edges into the bg
+   (only the centre band was visible). This version stays in the
+   chrome family while keeping every glyph fully readable. */
+.stats__label {
+  font-family: var(--font-mono);
+  font-weight: 500;
+  font-size: clamp(0.78rem, 0.95vw, 0.88rem);
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  background-image: linear-gradient(
+    180deg,
+    #f4f6fa 0%,
+    #d4d8e0 50%,
+    #f4f6fa 100%
+  );
+  -webkit-background-clip: text;
+          background-clip: text;
+  color: transparent;
+  -webkit-text-fill-color: transparent;
+}
+
+/* -----------------------------------------------------------------------
+   Reduced motion
+------------------------------------------------------------------------ */
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  .wordmark__plate         { animation: none; }
+  .wordmark__plate::after  { transition: none; }
+  .hero__status-dot::after { animation: none; }
+  .shockwave               { display: none; }
+  .section                 { transform: none !important; opacity: 1 !important; }
+  .topnav                  { transition: none; }
+}
+
+/* =========================================================================
+   Sticky pill nav — appears once the hero scrolls out of view
+========================================================================= */
+
+.topnav {
+  position: fixed;
+  top: 1rem;
+  left: 50%;
+  transform: translate(-50%, -150%);
+  display: flex;
+  align-items: center;
+  gap: clamp(0.75rem, 1.5vw, 1.5rem);
+  padding: 0.6rem 0.6rem 0.6rem 1.25rem;
+  border-radius: 999px;
+  background: rgba(20, 24, 30, 0.7);
+  backdrop-filter: blur(14px) saturate(140%);
+  -webkit-backdrop-filter: blur(14px) saturate(140%);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.35);
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  z-index: 100;
+  transition: transform 480ms cubic-bezier(0.2, 0.7, 0.3, 1);
+}
+
+.topnav.is-visible { transform: translate(-50%, 0); }
+
+.topnav__brand {
+  color: #f4f4f5;
+  text-decoration: none;
+  font-family: var(--font-display);
+  font-size: 0.95rem;
+  letter-spacing: 0.08em;
+  padding-right: 0.5rem;
+}
+
+.topnav__links {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  list-style: none;
+}
+
+.topnav__links a {
+  display: inline-block;
+  padding: 0.45rem 0.85rem;
+  color: rgba(244, 244, 245, 0.65);
+  text-decoration: none;
+  border-radius: 999px;
+  transition: color 200ms ease, background 200ms ease;
+}
+
+.topnav__links a:hover {
+  color: #f4f4f5;
+  background: rgba(255, 255, 255, 0.07);
+}
+
+@media (max-width: 720px) {
+  .topnav__links { display: none; }
+}
+
+/* =========================================================================
+   Surface — dark continuous floor wrapping all content sections below stats
+========================================================================= */
+
+.surface {
+  background: linear-gradient(
+    180deg,
+    #3e4650 0%,
+    #2a3038 22%,
+    #1e242a 55%,
+    #14181e 100%
+  );
+  position: relative;
+  isolation: isolate;
+  color: #d8dde4;
+}
+
+.surface::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: var(--pattern-cross-dark), var(--grain);
+  background-size: 44px 44px, 220px 220px;
+  opacity: 0.09;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.surface > * { position: relative; z-index: 1; }
+
+/* Decorative concentric rings — schematic / sonar fragment positioned
+   off the right edge so only an arc shows. Subtle metallic hairline. */
+.surface__rings {
+  position: absolute;
+  top: 16%;
+  left: 56%;
+  width: 78vw;
+  max-width: 1100px;
+  aspect-ratio: 1 / 1;
+  color: rgba(255, 255, 255, 0.18);
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Vertical chrome seam down the right edge of the surface — a long
+   metal hairline running through every dark section. */
+.surface__rail {
+  position: absolute;
+  top: 4%;
+  bottom: 4%;
+  right: clamp(0.5rem, 1.5vw, 1.25rem);
+  width: 1px;
+  background: linear-gradient(
+    to bottom,
+    transparent 0%,
+    rgba(255, 255, 255, 0.04) 6%,
+    rgba(255, 255, 255, 0.28) 50%,
+    rgba(255, 255, 255, 0.04) 94%,
+    transparent 100%
+  );
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* =========================================================================
+   Section base
+========================================================================= */
+
+.section {
+  padding: clamp(4rem, 9vw, 7rem) var(--gutter);
+  max-width: var(--max);
+  margin: 0 auto;
+  opacity: 0;
+  transform: translateY(24px);
+  transition:
+    opacity 700ms cubic-bezier(0.2, 0.7, 0.3, 1),
+    transform 700ms cubic-bezier(0.2, 0.7, 0.3, 1);
+}
+
+.section.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.section + .section {
+  border-top: 1px solid;
+  border-image: var(--chrome-rule) 1;
+}
+
+.section__head {
+  display: flex;
+  align-items: baseline;
+  gap: 1.25rem;
+  margin-bottom: clamp(2rem, 4vw, 3.5rem);
+  font-family: var(--font-mono);
+  font-size: clamp(0.72rem, 0.85vw, 0.8rem);
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+}
+
+.section__num {
+  font-variant-numeric: tabular-nums;
+  color: rgba(255, 255, 255, 0.4);
+}
+
+.section__num::before {
+  content: "—  ";
+  color: rgba(255, 255, 255, 0.25);
+}
+
+.section__label {
+  color: #f4f4f5;
+  background-image: linear-gradient(
+    180deg,
+    #ffffff 0%,
+    #c4ccd4 50%,
+    #ffffff 100%
+  );
+  -webkit-background-clip: text;
+          background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* =========================================================================
+   Latest — compact glass card wrapping the SoundCloud waveform widget
+========================================================================= */
+
+.section--latest {
+  /* Tighter than a standard section so the card reads as a player
+     instead of a full content block. */
+  padding-top:    clamp(2.25rem, 4.5vw, 3.25rem);
+  padding-bottom: clamp(2.25rem, 4.5vw, 3.25rem);
+}
+
+/* Card. Sits on the dark surface; subtle gradient + 1px border at rest;
+   lifts and brightens on hover with an inset top-edge chrome highlight
+   catching imaginary light. Cursor-tracked spotlight (--light-x/y) is
+   driven by initSpotlights() in scripts.js. */
+.latest__card {
+  --light-x: 50%;
+  --light-y: 50%;
+  --on: 0;
+
+  position: relative;
+  padding: clamp(1rem, 2vw, 1.5rem);
+  border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.04) 0%, rgba(255, 255, 255, 0.015) 100%);
+  backdrop-filter: blur(14px) saturate(130%);
+  -webkit-backdrop-filter: blur(14px) saturate(130%);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.06),
+    0 12px 28px rgba(0, 0, 0, 0.18);
+  overflow: hidden;
+  isolation: isolate;
+  transition:
+    transform 420ms cubic-bezier(0.2, 0.7, 0.3, 1),
+    border-color 320ms ease,
+    box-shadow  420ms ease,
+    background  320ms ease;
+}
+
+.latest__card:hover {
+  transform: translateY(-3px);
+  border-color: rgba(255, 255, 255, 0.22);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.07) 0%, rgba(255, 255, 255, 0.03) 100%);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.18),
+    0 28px 70px rgba(0, 0, 0, 0.34);
+}
+
+/* Cursor-tracked light pass over the card surface. */
+.latest__card::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: radial-gradient(
+    circle 30% at var(--light-x) var(--light-y),
+    rgba(255, 255, 255, 0.18) 0%,
+    rgba(255, 255, 255, 0.04) 35%,
+    transparent 70%
+  );
+  opacity: var(--on, 0);
+  transition: opacity 320ms ease;
+  mix-blend-mode: overlay;
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* Slow chrome-band that drifts across the card top-edge — earns its
+   keep when the card is at rest, fades out under the hover spotlight. */
+.latest__shine {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.05) 8%,
+    rgba(255, 255, 255, 0.5) 50%,
+    rgba(255, 255, 255, 0.05) 92%,
+    transparent 100%
+  );
+  background-size: 200% 100%;
+  background-position: 100% 0;
+  animation: latest-shine 12s linear infinite;
+  pointer-events: none;
+  z-index: 2;
+}
+
+@keyframes latest-shine {
+  to { background-position: -100% 0; }
+}
+
+/* -- Meta row (badge / title / permalink) -- */
+
+.latest__meta {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  gap: clamp(0.75rem, 2vw, 1.25rem);
+  margin-bottom: clamp(0.85rem, 1.5vw, 1.1rem);
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+}
+
+.latest__badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  color: #f4f4f5;
+}
+
+.latest__dot {
+  position: relative;
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  background: #f4f4f5;
+  border-radius: 50%;
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.25);
+}
+
+.latest__dot::after {
+  content: "";
+  position: absolute;
+  inset: -3px;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.55);
+  animation: latest-dot-pulse 2.2s ease-out infinite;
+}
+
+@keyframes latest-dot-pulse {
+  0%   { transform: scale(0.8); opacity: 0.7; }
+  100% { transform: scale(2.4); opacity: 0;   }
+}
+
+.latest__title {
+  color: rgba(255, 255, 255, 0.55);
+  letter-spacing: 0.18em;
+}
+
+.latest__permalink {
+  margin-left: auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  color: rgba(255, 255, 255, 0.5);
+  text-decoration: none;
+  padding: 0.4rem 0.6rem;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  transition: color 220ms ease, border-color 220ms ease, background 220ms ease, transform 220ms ease;
+}
+
+.latest__permalink:hover {
+  color: #f4f4f5;
+  border-color: rgba(255, 255, 255, 0.4);
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.latest__permalink-arrow {
+  font-size: 0.85rem;
+  line-height: 1;
+  transition: transform 220ms ease;
+}
+
+.latest__permalink:hover .latest__permalink-arrow {
+  transform: translate(2px, -2px);
+}
+
+/* -- The widget itself -- */
+
+.latest__player {
+  position: relative;
+  z-index: 2;
+  border-radius: 8px;
+  overflow: hidden;
+  background: rgba(0, 0, 0, 0.18);
+}
+
+.latest__embed {
+  display: block;
+  width: 100%;
+  height: 140px;            /* SoundCloud compact (visual=false) widget — slim/cool */
+  border: 0;
+  background: transparent;
+}
+
+@media (max-width: 600px) {
+  .latest__permalink-text { display: none; }   /* keep just the ↗ arrow on mobile */
+}
+
+/* =========================================================================
+   About
+========================================================================= */
+
+/* Two-column layout — portrait left, copy right on desktop; stacked
+   on mobile. align-items: stretch makes both columns the same height;
+   on desktop the portrait's width is derived from that height via
+   aspect-ratio (height: 100% + aspect-ratio: 4/3). Image gets a
+   Framer-style 3D cursor tilt + spotlight following the pointer
+   (see scripts.js → initPortraitTilt). */
+.about__layout {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: clamp(2rem, 4vw, 3rem);
+  align-items: stretch;
+}
+
+@media (min-width: 800px) {
+  .about__layout {
+    grid-template-columns: 1fr 1fr;
+    gap: clamp(2rem, 5vw, 4rem);
+  }
+}
+
+.about__portrait {
+  margin: 0;
+  perspective: 1400px;
+  min-width: 0;
+}
+
+.about__portrait-frame {
+  --tilt-x: 0deg;
+  --tilt-y: 0deg;
+  --light-x: 50%;
+  --light-y: 50%;
+  --on: 0;
+
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(180deg, #2a2e38 0%, #14181e 100%);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  transform: rotateX(var(--tilt-x)) rotateY(var(--tilt-y));
+  transform-style: preserve-3d;
+  transition: transform 480ms cubic-bezier(0.2, 0.7, 0.3, 1);
+  will-change: transform;
+}
+
+/* Desktop: equal column widths via 1fr 1fr in the grid above; both
+   the portrait frame and the copy block end up the same width. The
+   frame keeps its 4:3 aspect-ratio (height = width × 3/4); the copy
+   column stretches to match that height via align-items: stretch.
+   Result: two boxes of identical width AND height side by side. */
+.about__copy {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;     /* vertically center text in the matched height */
+  gap: clamp(1.5rem, 3vw, 2rem);
+}
+
+.about__portrait-img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 72%;          /* bias the 4:3 window toward the lower 2/3 of the photo so the figure + SUYAN sign stay framed; top of image (mostly brick) gets cropped */
+  filter: grayscale(100%) contrast(1.06);
+  transition: transform 700ms cubic-bezier(0.2, 0.7, 0.3, 1),
+              filter 400ms ease;
+  transform: translateZ(20px);          /* tiny depth — image floats above frame */
+}
+
+.about__portrait:hover .about__portrait-img {
+  transform: translateZ(20px) scale(1.04);
+  filter: grayscale(100%) contrast(1.12);
+}
+
+/* Cursor-tracked light pass over the image — soft white spot follows
+   the pointer, multiplies into the photo, gives a "polished glass"
+   feel on top of the print. */
+.about__portrait-light {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    circle 35% at var(--light-x) var(--light-y),
+    rgba(255, 255, 255, 0.22) 0%,
+    rgba(255, 255, 255, 0.05) 40%,
+    transparent 70%
+  );
+  opacity: var(--on, 0);
+  transition: opacity 320ms ease;
+  mix-blend-mode: overlay;
+  pointer-events: none;
+}
+
+/* Reuse the global film-grain over the photo for cohesion */
+.about__portrait-grain {
+  position: absolute;
+  inset: 0;
+  background-image: var(--grain);
+  background-size: 220px 220px;
+  opacity: 0.08;
+  mix-blend-mode: overlay;
+  pointer-events: none;
+}
+
+.about__portrait-caption {
+  display: flex;
+  justify-content: space-between;
+  margin-top: clamp(0.85rem, 1.5vw, 1.1rem);
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.about__statement {
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: clamp(1.5rem, 3.5vw, 2.5rem);
+  line-height: 1.18;
+  letter-spacing: -0.015em;
+  color: #f0f2f5;
+  max-width: 28ch;
+}
+
+.about__tags {
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0;
+}
+
+.about__tag {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  padding: 0.45rem 0.85rem;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 999px;
+  color: #c4ccd4;
+  transition: border-color 200ms ease, color 200ms ease, background 200ms ease;
+}
+
+.about__tag:hover {
+  border-color: rgba(255, 255, 255, 0.5);
+  color: #fff;
+  background: rgba(255, 255, 255, 0.04);
+}
+
+/* =========================================================================
+   Music
+========================================================================= */
+
+.music__featured {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: clamp(1.5rem, 3vw, 2.5rem);
+}
+
+@media (min-width: 880px) {
+  .music__featured { grid-template-columns: repeat(2, 1fr); }
+}
+
+.music__card {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding: clamp(1.25rem, 2.5vw, 1.75rem);
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 4px;
+  transition: border-color 240ms ease, background 240ms ease;
+}
+
+.music__card:hover {
+  border-color: rgba(255, 255, 255, 0.18);
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.music__card-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.music__card-meta {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.85rem;
+}
+
+.music__card-date {
+  color: rgba(255, 255, 255, 0.4);
+}
+
+.music__card-link {
+  color: rgba(255, 255, 255, 0.55);
+  text-decoration: none;
+  font-size: 0.95rem;
+  line-height: 1;
+  transition: color 200ms ease, transform 200ms ease;
+}
+
+.music__card-link:hover {
+  color: #fff;
+  transform: translate(2px, -2px);
+}
+
+.music__card-title {
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: clamp(1.35rem, 2.2vw, 1.75rem);
+  letter-spacing: -0.01em;
+  color: #f0f2f5;
+}
+
+.music__embed {
+  position: relative;
+  width: 100%;
+  border-radius: 4px;
+  overflow: hidden;
+  background: rgba(0, 0, 0, 0.3);
+}
+
+.music__embed iframe {
+  width: 100%;
+  border: 0;
+  display: block;
+}
+
+.music__embed--soundcloud iframe { height: 320px; }
+.music__embed--spotify    iframe { height: 380px; }
+
+.music__archive-heading {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.5);
+  margin: clamp(2.5rem, 4vw, 3.5rem) 0 1rem;
+}
+
+.music__archive {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+}
+
+.music__archive-link {
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  gap: 1.25rem;
+  align-items: center;
+  padding: 1rem 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  text-decoration: none;
+  color: #d8dde4;
+  font-family: var(--font-body);
+  font-size: 1rem;
+  transition: color 200ms ease, padding-left 240ms ease;
+}
+
+.music__archive-link:hover {
+  color: #fff;
+  padding-left: 0.5rem;
+}
+
+.music__archive-platform,
+.music__archive-date {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.4);
+}
+
+/* =========================================================================
+   Shows
+========================================================================= */
+
+.shows__group-heading {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.5);
+  margin: 0 0 1rem;
+}
+
+.shows__group-heading--past {
+  margin-top: clamp(2.5rem, 4vw, 3.5rem);
+}
+
+.shows__list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 0;
+}
+
+.show {
+  display: grid;
+  grid-template-columns: 9rem 1fr 9rem auto;
+  gap: 1rem;
+  align-items: baseline;
+  padding: 1.1rem 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  transition: padding-left 240ms ease;
+}
+
+.show:hover { padding-left: 0.5rem; }
+
+.show--empty {
+  display: block;
+  color: rgba(255, 255, 255, 0.5);
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  padding: 1.5rem 0;
+}
+
+.show__date {
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  letter-spacing: 0.14em;
+  color: #f4f4f5;
+  font-variant-numeric: tabular-nums;
+}
+
+.show__venue {
+  font-family: var(--font-display);
+  font-size: clamp(1.1rem, 1.7vw, 1.45rem);
+  color: #f0f2f5;
+}
+
+.show__city {
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.55);
+}
+
+.show__action {
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  text-align: right;
+  color: rgba(255, 255, 255, 0.45);
+}
+
+.show__action a {
+  color: #f4f4f5;
+  text-decoration: none;
+  border-bottom: 1px solid transparent;
+  transition: border-color 200ms ease;
+}
+
+.show__action a:hover { border-color: #f4f4f5; }
+
+@media (max-width: 720px) {
+  .show {
+    grid-template-columns: 1fr auto;
+    grid-template-areas:
+      "date action"
+      "venue venue"
+      "city city";
+    gap: 0.35rem 1rem;
+  }
+  .show__date   { grid-area: date; }
+  .show__venue  { grid-area: venue; }
+  .show__city   { grid-area: city; }
+  .show__action { grid-area: action; }
+}
+
+/* =========================================================================
+   Contact
+========================================================================= */
+
+.contact__form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  max-width: 720px;
+}
+
+.contact__row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.25rem;
+}
+
+@media (max-width: 600px) {
+  .contact__row { grid-template-columns: 1fr; }
+}
+
+.contact__field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.contact__field--full { grid-column: 1 / -1; }
+
+.contact__label {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.55);
+}
+
+.contact__optional {
+  text-transform: none;
+  letter-spacing: 0.05em;
+  color: rgba(255, 255, 255, 0.35);
+}
+
+.contact__form input[type="text"],
+.contact__form input[type="email"],
+.contact__form input[type="date"],
+.contact__form select,
+.contact__form textarea {
+  width: 100%;
+  padding: 0.85rem 1rem;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+  color: #f4f4f5;
+  font-family: var(--font-body);
+  font-size: 1rem;
+  line-height: 1.4;
+  transition: border-color 200ms ease, background 200ms ease;
+}
+
+.contact__form select {
+  appearance: none;
+  -webkit-appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%23c4ccd4' d='M6 8 0 0h12z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 1rem center;
+  padding-right: 2.5rem;
+}
+
+.contact__form textarea {
+  resize: vertical;
+  min-height: 8rem;
+  font-family: var(--font-body);
+}
+
+.contact__form input:focus,
+.contact__form select:focus,
+.contact__form textarea:focus {
+  outline: none;
+  border-color: rgba(255, 255, 255, 0.5);
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.contact__honeypot {
+  position: absolute;
+  left: -9999px;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+}
+
+.contact__submit {
+  align-self: flex-start;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.95rem 1.6rem;
+  background: #f4f4f5;
+  color: #0a0a0a;
+  border: 1px solid #f4f4f5;
+  border-radius: 999px;
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: transform 240ms ease, background 200ms ease, color 200ms ease;
+  will-change: transform;
+}
+
+.contact__submit:hover {
+  background: #fff;
+}
+
+.contact__submit-arrow {
+  font-size: 1rem;
+  transition: transform 220ms ease;
+}
+
+.contact__submit:hover .contact__submit-arrow {
+  transform: translateX(4px);
+}
+
+.contact__status {
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  letter-spacing: 0.12em;
+  color: rgba(255, 255, 255, 0.55);
+  min-height: 1.2em;
+}
+
+.contact__fallback {
+  margin-top: clamp(1.5rem, 3vw, 2.25rem);
+  font-family: var(--font-body);
+  font-size: 0.95rem;
+  color: rgba(255, 255, 255, 0.55);
+}
+
+.contact__fallback-link {
+  color: #f4f4f5;
+  text-decoration: none;
+  border-bottom: 1px solid rgba(244, 244, 245, 0.4);
+  transition: border-color 200ms ease;
+}
+
+.contact__fallback-link:hover { border-color: #f4f4f5; }
+
+/* =========================================================================
+   Footer
+========================================================================= */
+
+.footer {
+  background: #0c0e12;
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+  padding: clamp(2.5rem, 5vw, 4rem) var(--gutter) clamp(1.5rem, 3vw, 2.5rem);
+  color: rgba(255, 255, 255, 0.55);
+}
+
+.footer__inner {
+  max-width: var(--max);
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: clamp(2rem, 4vw, 3rem);
+  align-items: end;
+}
+
+@media (max-width: 720px) {
+  .footer__inner { grid-template-columns: 1fr; }
+}
+
+.footer__brand {
+  display: flex;
+  align-items: baseline;
+  gap: 0.85rem;
+  font-family: var(--font-display);
+  color: #f4f4f5;
+  font-size: clamp(2rem, 4vw, 3rem);
+  letter-spacing: -0.02em;
+}
+
+.footer__loc {
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.45);
+}
+
+.footer__links {
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.25rem;
+  justify-self: end;
+  align-self: end;
+}
+
+@media (max-width: 720px) {
+  .footer__links { justify-self: start; }
+}
+
+.footer__links a {
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.55);
+  text-decoration: none;
+  transition: color 200ms ease;
+}
+
+.footer__links a:hover { color: #f4f4f5; }
+
+.footer__meta {
+  grid-column: 1 / -1;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1.25rem;
+  margin-top: clamp(1.5rem, 3vw, 2rem);
+  padding-top: clamp(1rem, 2vw, 1.5rem);
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.4);
+}
+
+@media (max-width: 600px) {
+  .footer__meta { flex-direction: column; align-items: flex-start; }
+}
+
+.footer__email {
+  color: rgba(255, 255, 255, 0.55);
+  text-decoration: none;
+  transition: color 200ms ease;
+}
+
+.footer__email:hover { color: #f4f4f5; }

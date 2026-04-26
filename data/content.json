@@ -1,0 +1,25 @@
+{
+  "tagline": "DJ + producer · house · afrohouse · trap · techno",
+  "location": "NYC",
+  "coords": "40.71° N · 74.01° W",
+  "status": "BOOKINGS OPEN",
+  "est": "EST. 2022",
+  "booking_email": "bookings@suyan.us",
+  "about": "SUYAN is a NYC-based DJ and producer working across house, afrohouse, trap, and techno — building for the groove, peak, and everything in between.",
+  "genres": ["house", "afrohouse", "trap", "techno"],
+  "portrait_url": "/assets/press/portrait.jpg",
+  "portrait_caption": "PORTRAIT · 2025",
+  "latest_track": {
+    "title": "Latest",
+    "external_url": "https://soundcloud.com/prod-suyan",
+    "embed_url": "https://w.soundcloud.com/player/?url=https%3A//soundcloud.com/prod-suyan&color=%23f4f4f5&inverse=true&auto_play=false&show_user=true&visual=false&hide_related=true&show_comments=false&show_reposts=false&show_teaser=false"
+  },
+  "web3forms_key": "YOUR_WEB3FORMS_ACCESS_KEY",
+  "links": {
+    "soundcloud": "https://soundcloud.com/prod-suyan",
+    "spotify": "https://open.spotify.com/artist/3KiOdFDnsNyoomZyh0hOfs",
+    "instagram": "https://www.instagram.com/matthew_su/",
+    "tiktok": "https://www.tiktok.com/@suyan.prod",
+    "youtube": "https://youtube.com/matthewsu"
+  }
+}

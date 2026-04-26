@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#b8b8bc" />
+  <title>SUYAN</title>
+  <meta name="description" content="SUYAN — DJ and producer based in NYC. House, afrohouse, trap techno." />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+
+  <link href="https://fonts.googleapis.com/css2?family=Anton&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="cursor" data-cursor aria-hidden="true">
+    <div class="cursor__ring"></div>
+    <div class="cursor__dot"></div>
+  </div>
+
+  <nav class="topnav" data-topnav aria-label="Section navigation">
+    <a class="topnav__brand" href="#top">SUYAN</a>
+    <ul class="topnav__links">
+      <li><a href="#about">About</a></li>
+      <li><a href="#music">Music</a></li>
+      <li><a href="#shows">Shows</a></li>
+      <li><a href="#contact">Contact</a></li>
+    </ul>
+  </nav>
+
+  <main>
+    <section class="hero" id="top" aria-labelledby="wordmark">
+      <div class="hero__floor-light" aria-hidden="true"></div>
+
+      <header class="hero__top">
+        <div class="hero__brand">
+          <span class="hero__brand-mark" aria-hidden="true">◉</span>
+          <span data-bind="content.location">NYC</span>
+          <span class="hero__divider" aria-hidden="true">/</span>
+          <span data-bind="content.coords">—</span>
+        </div>
+        <div class="hero__status">
+          <span class="hero__status-dot" aria-hidden="true"></span>
+          <span data-bind="content.status">—</span>
+          <span class="hero__divider" aria-hidden="true">/</span>
+          <span data-time>—</span>
+        </div>
+      </header>
+
+      <div class="hero__stage">
+        <div class="wordmark-wrap">
+          <h1 class="wordmark" id="wordmark" aria-label="SUYAN">
+            <span class="wordmark__plate" data-text="SUYAN" aria-hidden="true">SUYAN</span>
+          </h1>
+          <span class="wordmark__reflect" aria-hidden="true">SUYAN</span>
+        </div>
+      </div>
+
+      <footer class="hero__bottom">
+        <a class="hero__cue" href="#stats" aria-label="Continue to next section">
+          <span class="hero__cue-line" aria-hidden="true"></span>
+          <span class="hero__cue-dot"  aria-hidden="true"></span>
+        </a>
+      </footer>
+    </section>
+
+    <section class="stats" id="stats" aria-label="By the numbers">
+      <ol class="stats__grid" data-stats></ol>
+    </section>
+
+    <div class="surface">
+      <div class="surface__rail" aria-hidden="true"></div>
+      <svg class="surface__rings" viewBox="0 0 1000 1000" aria-hidden="true" focusable="false">
+        <g fill="none" stroke="currentColor" stroke-width="0.5" vector-effect="non-scaling-stroke">
+          <circle cx="500" cy="500" r="80"  />
+          <circle cx="500" cy="500" r="180" />
+          <circle cx="500" cy="500" r="280" />
+          <circle cx="500" cy="500" r="380" />
+          <circle cx="500" cy="500" r="480" />
+        </g>
+      </svg>
+
+      <section class="section section--latest" id="latest" aria-labelledby="latest-label">
+        <div class="latest__card" data-spotlight>
+          <span class="latest__shine" aria-hidden="true"></span>
+
+          <header class="latest__meta">
+            <span class="latest__badge" id="latest-label">
+              <span class="latest__dot" aria-hidden="true"></span>
+              <span>Latest</span>
+            </span>
+            <span class="latest__title" data-bind="content.latest_track.title">Latest</span>
+            <a class="latest__permalink"
+               data-bind-href="content.latest_track.external_url"
+               target="_blank"
+               rel="noopener"
+               aria-label="Open on SoundCloud">
+              <span class="latest__permalink-text">SoundCloud</span>
+              <span class="latest__permalink-arrow" aria-hidden="true">↗</span>
+            </a>
+          </header>
+
+          <div class="latest__player">
+            <iframe class="latest__embed"
+                    data-bind-src="content.latest_track.embed_url"
+                    loading="lazy"
+                    frameborder="0"
+                    scrolling="no"
+                    allow="autoplay"
+                    title="SUYAN — latest track on SoundCloud"></iframe>
+          </div>
+        </div>
+      </section>
+
+      <section class="section section--about" id="about" aria-labelledby="about-label">
+        <header class="section__head">
+          <span class="section__num">01</span>
+          <span class="section__label" id="about-label">About</span>
+        </header>
+
+        <div class="about__layout">
+          <figure class="about__portrait" data-tilt>
+            <div class="about__portrait-frame">
+              <img class="about__portrait-img"
+                   data-bind-src="content.portrait_url"
+                   alt="SUYAN — portrait against a brick wall door stenciled SUYAN"
+                   loading="lazy" />
+              <span class="about__portrait-light" aria-hidden="true"></span>
+              <span class="about__portrait-grain" aria-hidden="true"></span>
+            </div>
+            <figcaption class="about__portrait-caption">
+              <span data-bind="content.location">NYC</span>
+              <span data-bind="content.portrait_caption">—</span>
+            </figcaption>
+          </figure>
+
+          <div class="about__copy">
+            <p class="about__statement" data-bind="content.about">—</p>
+            <ul class="about__tags" data-genres aria-label="Genres"></ul>
+          </div>
+        </div>
+      </section>
+
+      <section class="section section--music" id="music" aria-labelledby="music-label">
+        <header class="section__head">
+          <span class="section__num">02</span>
+          <span class="section__label" id="music-label">Music</span>
+        </header>
+        <div class="music__featured" data-music-featured></div>
+        <h3 class="music__archive-heading" data-music-archive-heading hidden>Archive</h3>
+        <ul class="music__archive" data-music-archive></ul>
+      </section>
+
+      <section class="section section--shows" id="shows" aria-labelledby="shows-label">
+        <header class="section__head">
+          <span class="section__num">03</span>
+          <span class="section__label" id="shows-label">Shows</span>
+        </header>
+        <h3 class="shows__group-heading">Upcoming</h3>
+        <ol class="shows__list" data-shows-upcoming></ol>
+        <h3 class="shows__group-heading shows__group-heading--past" data-shows-past-heading hidden>Archive</h3>
+        <ol class="shows__list shows__list--past" data-shows-past></ol>
+      </section>
+
+      <section class="section section--contact" id="contact" aria-labelledby="contact-label">
+        <header class="section__head">
+          <span class="section__num">04</span>
+          <span class="section__label" id="contact-label">Contact</span>
+        </header>
+
+        <form class="contact__form" action="https://api.web3forms.com/submit" method="POST" data-contact-form novalidate>
+          <input type="hidden" name="access_key" data-bind-value="content.web3forms_key" value="" />
+          <input type="hidden" name="from_name" value="suyan.us" />
+          <input type="hidden" name="subject" value="suyan.us — new inquiry" />
+          <input type="checkbox" name="botcheck" class="contact__honeypot" tabindex="-1" autocomplete="off" />
+
+          <div class="contact__row">
+            <label class="contact__field">
+              <span class="contact__label">Name</span>
+              <input type="text" name="name" required autocomplete="name" />
+            </label>
+            <label class="contact__field">
+              <span class="contact__label">Email</span>
+              <input type="email" name="email" required autocomplete="email" />
+            </label>
+          </div>
+
+          <div class="contact__row">
+            <label class="contact__field">
+              <span class="contact__label">Inquiry</span>
+              <select name="inquiry_type" required>
+                <option value="Booking">Booking</option>
+                <option value="Press">Press</option>
+                <option value="Demo">Demo</option>
+                <option value="Other">Other</option>
+              </select>
+            </label>
+            <label class="contact__field">
+              <span class="contact__label">Event date <span class="contact__optional">(optional)</span></span>
+              <input type="date" name="event_date" />
+            </label>
+          </div>
+
+          <label class="contact__field contact__field--full">
+            <span class="contact__label">Message</span>
+            <textarea name="message" rows="5" required></textarea>
+          </label>
+
+          <button type="submit" class="contact__submit" data-magnetic>
+            <span>Send</span>
+            <span class="contact__submit-arrow" aria-hidden="true">→</span>
+          </button>
+
+          <p class="contact__status" data-contact-status role="status" aria-live="polite"></p>
+        </form>
+
+        <p class="contact__fallback">
+          Or email
+          <a class="contact__fallback-link"
+             data-bind="content.booking_email"
+             data-bind-href="content.booking_email"
+             data-bind-href-prefix="mailto:">bookings@suyan.us</a>
+        </p>
+      </section>
+    </div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer__inner">
+      <div class="footer__brand">
+        <span class="footer__mark">SUYAN</span>
+        <span class="footer__loc" data-bind="content.location">NYC</span>
+      </div>
+      <ul class="footer__links">
+        <li><a data-bind-href="content.links.soundcloud" target="_blank" rel="noopener">SoundCloud</a></li>
+        <li><a data-bind-href="content.links.spotify"    target="_blank" rel="noopener">Spotify</a></li>
+        <li><a data-bind-href="content.links.instagram"  target="_blank" rel="noopener">Instagram</a></li>
+        <li><a data-bind-href="content.links.tiktok"     target="_blank" rel="noopener">TikTok</a></li>
+        <li><a data-bind-href="content.links.youtube"    target="_blank" rel="noopener">YouTube</a></li>
+      </ul>
+      <div class="footer__meta">
+        <span>© SUYAN <span data-year>2026</span></span>
+        <a class="footer__email"
+           data-bind="content.booking_email"
+           data-bind-href="content.booking_email"
+           data-bind-href-prefix="mailto:">bookings@suyan.us</a>
+      </div>
+    </div>
+  </footer>
+
+  <script src="scripts.js"></script>
+</body>
+</html>
