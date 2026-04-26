@@ -169,25 +169,47 @@ body {
   gap: clamp(1.5rem, 3vw, 2.5rem);
   overflow: hidden;
   isolation: isolate;
-  /* Framer-style chrome floor — soft top bloom + smooth vertical
-     tonal range. No horizontal banding (the earlier "horizon stripe"
-     read as a misaligned divider once the rest of the hero was
-     stripped down). Cool-tinted silver throughout. */
+  /* Fallback solid in case the face image fails to load. The
+     .hero__bg layer below covers this in normal use. */
+  background: #1a1e26;
+}
+
+/* Face portrait as the hero background — full-bleed, greyscale to
+   match the chrome aesthetic, with a radial vignette so the chrome
+   wordmark stays legible against the centred face. The brushed-steel
+   + film-grain ::before overlay sits above this and blends onto it
+   automatically (mix-blend-mode: overlay), as does the cursor floor
+   light. */
+.hero__bg {
+  position: absolute;
+  inset: 0;
+  z-index: -2;
+  overflow: hidden;
+}
+
+.hero__bg-img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  filter: grayscale(1) contrast(1.05) brightness(0.55);
+}
+
+/* Vignette: keep the centre relatively bright so the face reads,
+   crush the edges so they recede and frame the wordmark. */
+.hero__bg::after {
+  content: "";
+  position: absolute;
+  inset: 0;
   background:
     radial-gradient(
-      ellipse 130vw 95vh at 50% -8%,
-      rgba(255, 255, 255, 0.50) 0%,
-      rgba(255, 255, 255, 0.10) 30%,
-      transparent 60%
-    ),
-    linear-gradient(
-      180deg,
-      #dde2ea 0%,
-      #c4cad4 32%,
-      #aab2bc 62%,
-      #8c94a0 92%,
-      #6a727c 100%
+      ellipse 90vw 75vh at 50% 50%,
+      transparent 0%,
+      rgba(0, 0, 0, 0.35) 60%,
+      rgba(0, 0, 0, 0.65) 100%
     );
+  pointer-events: none;
 }
 
 /* Brushed steel + film grain only (crosshair grid removed from hero
@@ -239,7 +261,7 @@ body {
   font-size: clamp(0.7rem, 0.85vw, 0.78rem);
   letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: var(--grey-2);
+  color: rgba(255, 255, 255, 0.75);
 }
 
 .hero__brand,
@@ -252,11 +274,11 @@ body {
 
 .hero__brand-mark {
   font-size: 0.65rem;
-  color: var(--fg);
+  color: #fff;
 }
 
 .hero__divider {
-  color: var(--grey-4);
+  color: rgba(255, 255, 255, 0.35);
 }
 
 .hero__status-dot {
@@ -264,9 +286,9 @@ body {
   display: inline-block;
   width: 8px;
   height: 8px;
-  background: var(--fg);
+  background: #f4f4f5;
   border-radius: 50%;
-  box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.15);
 }
 
 .hero__status-dot::after {
@@ -274,7 +296,7 @@ body {
   position: absolute;
   inset: -3px;
   border-radius: 50%;
-  border: 1px solid rgba(0, 0, 0, 0.45);
+  border: 1px solid rgba(255, 255, 255, 0.5);
   animation: pulse 2.2s ease-out infinite;
 }
 
@@ -355,7 +377,7 @@ body {
   background: linear-gradient(
     to bottom,
     transparent 0%,
-    rgba(0, 0, 0, 0.55) 50%,
+    rgba(255, 255, 255, 0.6) 50%,
     transparent 100%
   );
 }
@@ -363,7 +385,7 @@ body {
 .hero__cue-dot {
   width: 4px;
   height: 4px;
-  background: rgba(0, 0, 0, 0.7);
+  background: rgba(255, 255, 255, 0.75);
   border-radius: 50%;
   animation: cue-bounce 2.4s ease-in-out infinite;
 }
