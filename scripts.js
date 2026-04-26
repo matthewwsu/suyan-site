@@ -130,35 +130,23 @@ function renderStats(items) {
 
 /* ------------------------------------------------------------------ */
 
-/* Hero intro: chrome wordmark video loops indefinitely while the page
-   is open. Reduced-motion users (or browsers that block autoplay) fall
-   through to the static PNG via the .is-resolved class. The native
-   <video loop> attribute handles the looping; this function only deals
-   with the fallback paths.
-
-   Two source formats are shipped: webm (VP9 + alpha) for modern
-   browsers, mp4 (H.264, no alpha) for iOS Safari < 17 and other
-   browsers without VP9-alpha support. When the mp4 is the chosen
-   source, we tag the video with .is-mp4 so the CSS can apply
-   mix-blend-mode: screen to drop the black background that H.264 can't
-   carry as alpha. The webm path doesn't need the blend (true alpha). */
+/* Hero intro: chrome wordmark video loops indefinitely on desktop.
+   Mobile / touch devices and reduced-motion users skip the video and
+   see the alpha-keyed still PNG immediately via the .is-resolved
+   class. The mobile skip is intentional — the mp4 fallback path on
+   older iOS Safari leaves a black matte we can't reliably blend away
+   inside every stacking context, and the static cutout reads cleanly
+   on every device regardless of codec support. */
 function initIntroVideo() {
   const wordmark = $(".wordmark");
   const video    = $(".wordmark__video");
   if (!wordmark || !video) return;
 
-  if (isReduced()) {
+  const isMobile = matchMedia("(max-width: 720px), (pointer: coarse)").matches;
+  if (isReduced() || isMobile) {
     wordmark.classList.add("is-resolved");
     return;
   }
-
-  const tagMp4 = () => {
-    if (video.currentSrc && video.currentSrc.endsWith(".mp4")) {
-      video.classList.add("is-mp4");
-    }
-  };
-  if (video.readyState >= 1) tagMp4();
-  else video.addEventListener("loadedmetadata", tagMp4, { once: true });
 
   /* Belt-and-suspenders: muted+playsinline+autoplay should start
      playback automatically, but call .play() too in case the browser
