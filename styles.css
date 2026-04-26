@@ -300,114 +300,74 @@ body {
 }
 
 .wordmark {
+  position: relative;
   display: block;
-  font-family: var(--font-display);
-  font-weight: 400;        /* Anton ships as a single Regular weight that's already heavy */
-  font-size: clamp(4.5rem, 24vw, 22rem);
-  line-height: 0.92;       /* Anton has tall caps; tighter line-height clips ascenders */
-  letter-spacing: -0.02em;
+  width: fit-content;
+  margin: 0 auto;
   text-align: center;
   user-select: none;
 }
 
-.wordmark__plate {
-  --mx: 50%;
-  --my: 50%;
-
-  position: relative;
-  display: inline-block;
-  background-image: var(--chrome-dark);
-  background-size: 100% 240%;
-  background-position: 0% 0%;
-  background-repeat: no-repeat;
-  -webkit-background-clip: text;
-          background-clip: text;
-  color: transparent;
-  -webkit-text-fill-color: transparent;
+/* Video plays the chrome intro; still PNG sits stacked over it at
+   opacity 0 and fades in once the loop count is reached, while the
+   video fades out. Both share the same aspect ratio, so the swap is
+   pixel-stable. mix-blend-mode: screen drops the pure-black background
+   in both files (black is the identity element of screen blend). */
+.wordmark__video,
+.wordmark__still {
+  display: block;
+  width: clamp(20rem, 80vw, 72rem);
+  height: auto;
+  aspect-ratio: 4816 / 2688;
+  mix-blend-mode: screen;
+  pointer-events: none;
   filter:
-    drop-shadow(0 1px 0 rgba(255, 255, 255, 0.55))
     drop-shadow(0 12px 30px rgba(0, 0, 0, 0.30))
     drop-shadow(0 36px 80px rgba(0, 0, 0, 0.18));
-  animation: chrome-drift 14s ease-in-out infinite alternate;
 }
 
-/* Cursor wave — a single soft chrome highlight that lazy-follows the
-   cursor. JS lerps --mx / --my toward the cursor's position each frame
-   so the spotlight glides instead of snapping. No spawning, no pulsing
-   — one continuous gentle wave. */
-.wordmark__plate::after {
-  content: attr(data-text);
+.wordmark__still {
   position: absolute;
-  inset: 0;
-  background-image: linear-gradient(
-    180deg,
-    #f6f6fa 0%,
-    #ffffff 50%,
-    #d8d8dc 100%
-  );
-  -webkit-background-clip: text;
-          background-clip: text;
-  color: transparent;
-  -webkit-text-fill-color: transparent;
-  pointer-events: none;
-  opacity: var(--wave, 0);
-  transition: opacity 600ms ease;
-
-  -webkit-mask-image: radial-gradient(
-    circle 18vw at var(--mx) var(--my),
-    rgba(0, 0, 0, 0.55) 0%,
-    rgba(0, 0, 0, 0.30) 28%,
-    rgba(0, 0, 0, 0.12) 50%,
-    transparent 75%
-  );
-          mask-image: radial-gradient(
-    circle 18vw at var(--mx) var(--my),
-    rgba(0, 0, 0, 0.55) 0%,
-    rgba(0, 0, 0, 0.30) 28%,
-    rgba(0, 0, 0, 0.12) 50%,
-    transparent 75%
-  );
+  inset: 0 auto auto 0;
+  opacity: 0;
+  transition: opacity 700ms ease;
 }
 
-/* Mirror reflection beneath the wordmark — fades into the floor.
-   scaleY(-1) flips vertically; mask gradient is reversed accordingly so
-   the visible side closest to the wordmark is the most opaque. */
+.wordmark__video {
+  transition: opacity 700ms ease;
+}
+
+.wordmark.is-resolved .wordmark__still { opacity: 1; }
+.wordmark.is-resolved .wordmark__video { opacity: 0; }
+
+/* Mirror reflection — flipped PNG fading into the silver floor. Same
+   width as the wordmark, centered under it; mask reversed so the
+   visible side closest to the wordmark is the most opaque. */
 .wordmark__reflect {
   position: absolute;
   top: 100%;
-  left: 0;
+  left: 50%;
   display: block;
-  font-family: var(--font-display);
-  font-weight: 400;
-  font-size: clamp(4.5rem, 24vw, 22rem);
-  line-height: 0.92;
-  letter-spacing: -0.02em;
-  background-image: var(--chrome-dark);
-  -webkit-background-clip: text;
-          background-clip: text;
-  color: transparent;
-  -webkit-text-fill-color: transparent;
-  transform: scaleY(-1);
+  width: clamp(20rem, 80vw, 72rem);
+  height: auto;
+  aspect-ratio: 4816 / 2688;
+  transform: translateX(-50%) scaleY(-1);
+  mix-blend-mode: screen;
+  pointer-events: none;
+  filter: blur(0.5px);
+  opacity: 0.45;
   -webkit-mask-image: linear-gradient(
     to top,
-    rgba(0, 0, 0, 0.40) 0%,
-    rgba(0, 0, 0, 0.10) 30%,
+    rgba(0, 0, 0, 0.45) 0%,
+    rgba(0, 0, 0, 0.12) 32%,
     transparent 70%
   );
           mask-image: linear-gradient(
     to top,
-    rgba(0, 0, 0, 0.40) 0%,
-    rgba(0, 0, 0, 0.10) 30%,
+    rgba(0, 0, 0, 0.45) 0%,
+    rgba(0, 0, 0, 0.12) 32%,
     transparent 70%
   );
-  pointer-events: none;
-  filter: blur(0.4px);
-  opacity: 0.5;
-}
-
-@keyframes chrome-drift {
-  0%   { background-position: 0% 0%; }
-  100% { background-position: 0% 100%; }
 }
 
 /* -- Bottom row — minimal scroll cue only -------------------------- */
@@ -559,8 +519,8 @@ body {
 
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
-  .wordmark__plate         { animation: none; }
-  .wordmark__plate::after  { transition: none; }
+  .wordmark__video         { display: none; }
+  .wordmark__still         { opacity: 1; transition: none; position: static; }
   .hero__status-dot::after { animation: none; }
   .shockwave               { display: none; }
   .section                 { transform: none !important; opacity: 1 !important; }

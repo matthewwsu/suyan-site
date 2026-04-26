@@ -130,45 +130,43 @@ function renderStats(items) {
 
 /* ------------------------------------------------------------------ */
 
-/* Cursor wave — single soft chrome highlight that lazy-follows the cursor.
-   We lerp the rendered position toward the cursor target each frame, so
-   the highlight glides smoothly with damping instead of snapping. The
-   damping factor (0.08) gives ~600ms to converge — slow and organic. */
-function initWordmarkRipple() {
-  const el = $(".wordmark__plate");
-  if (!el || !isHover()) return;
+/* Hero intro: play the chrome wordmark video N times, then crossfade to
+   the static PNG. Both files are black-matte rendered chrome; CSS uses
+   mix-blend-mode: screen to drop the black so they composite cleanly
+   over the silver hero floor. Reduced-motion users skip the video and
+   see the still immediately (handled in CSS). Autoplay-blocked browsers
+   also fall through to the still. */
+function initIntroVideo() {
+  const wordmark = $(".wordmark");
+  const video    = $(".wordmark__video");
+  if (!wordmark || !video) return;
 
-  const DAMP = 0.08;
-  let tx = 50, ty = 50;   // target (true cursor position)
-  let cx = 50, cy = 50;   // rendered (lerped) position
-  let raf = 0;
-  let active = false;
+  if (isReduced()) {
+    wordmark.classList.add("is-resolved");
+    return;
+  }
 
-  const tick = () => {
-    cx += (tx - cx) * DAMP;
-    cy += (ty - cy) * DAMP;
-    el.style.setProperty("--mx", cx + "%");
-    el.style.setProperty("--my", cy + "%");
-    if (active) raf = requestAnimationFrame(tick);
-    else raf = 0;
-  };
+  const LOOPS = 2;
+  let played = 0;
 
-  el.addEventListener("pointerenter", () => {
-    el.style.setProperty("--wave", "1");
-    if (!active) {
-      active = true;
-      raf = requestAnimationFrame(tick);
+  video.addEventListener("ended", () => {
+    played += 1;
+    if (played < LOOPS) {
+      video.currentTime = 0;
+      video.play().catch(() => wordmark.classList.add("is-resolved"));
+    } else {
+      wordmark.classList.add("is-resolved");
     }
   });
-  el.addEventListener("pointerleave", () => {
-    el.style.setProperty("--wave", "0");
-    active = false;
-  });
-  el.addEventListener("pointermove", (e) => {
-    const rect = el.getBoundingClientRect();
-    tx = ((e.clientX - rect.left) / rect.width)  * 100;
-    ty = ((e.clientY - rect.top)  / rect.height) * 100;
-  });
+
+  /* Belt-and-suspenders: the muted+playsinline+autoplay attrs should
+     start playback automatically, but call .play() too in case the
+     browser delayed it. If autoplay is blocked entirely (rare for muted
+     video), fall through to the still. */
+  const start = video.play();
+  if (start && typeof start.catch === "function") {
+    start.catch(() => wordmark.classList.add("is-resolved"));
+  }
 }
 
 /* Custom cursor follower + cursor-tracked floor light.
@@ -207,7 +205,7 @@ function initCursor() {
   });
 
   /* Hover scale-up over interactive elements */
-  $$(".hero a, .hero button, .hero [data-magnetic], .wordmark__plate").forEach((el) => {
+  $$(".hero a, .hero button, .hero [data-magnetic]").forEach((el) => {
     el.addEventListener("pointerenter", () => cursor.classList.add("is-hover"));
     el.addEventListener("pointerleave", () => cursor.classList.remove("is-hover"));
   });
@@ -623,7 +621,7 @@ function initSectionReveals() {
     console.error("[suyan] init failed:", err);
   }
 
-  initWordmarkRipple();
+  initIntroVideo();
   initCursor();
   initMagnetic();
   initShockwave();
